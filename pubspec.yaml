@@ -1,0 +1,15 @@
+name: root
+description: Monorepo for GraphQL WebSocket packages
+publish_to: "none"
+
+environment:
+  sdk: ^3.6.0
+
+dev_dependencies:
+  lints: ^5.1.0
+  test: ^1.24.0
+
+workspace:
+  - packages/graphql_web_socket_core
+  - packages/graphql_web_socket_client
+  - packages/graphql_web_socket_link

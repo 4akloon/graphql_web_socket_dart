@@ -1,0 +1,17 @@
+name: graphql_web_socket_core
+description: A WebSocket transport for GraphQL.
+version: 0.0.1
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  rxdart: ^0.28.0
+  collection: ^1.18.0
+
+  web_socket_channel: ^3.0.2
+
+dev_dependencies:
+  test: ^1.25.8
+
+resolution: workspace

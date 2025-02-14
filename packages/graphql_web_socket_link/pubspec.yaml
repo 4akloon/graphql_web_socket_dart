@@ -1,0 +1,20 @@
+name: graphql_web_socket_link
+description: A starting point for Dart libraries or applications.
+version: 1.0.0
+
+environment:
+  sdk: ^3.5.4
+
+dependencies:
+  gql: ^1.0.0+1
+  gql_exec: ^1.0.0+1
+  gql_link: ^1.0.0+1
+
+  graphql_web_socket_client:
+
+dev_dependencies:
+  test: ^1.25.8
+
+  stream_channel: ^2.1.2
+
+resolution: workspace
