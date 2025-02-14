@@ -1,39 +1,175 @@
-<!-- 
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# GraphQL WebSocket Link
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages). 
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages). 
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+A GraphQL Link implementation for the `gql` ecosystem that enables WebSocket connections for subscriptions and other real-time operations.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+- WebSocket-based GraphQL operations
+- Support for both `graphql-ws` and `subscriptions-transport-ws` protocols
+- Auto-reconnection capabilities
+- Connection state monitoring
+- Custom ID generation
+- Integration with `gql` ecosystem
 
-## Getting started
+## Installation
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+Add this to your package's `pubspec.yaml` file:
+
+```yaml
+dependencies:
+  graphql_web_socket_link: ^1.0.0
+```
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder. 
+### Basic Setup
 
 ```dart
-const like = 'sample';
+import 'package:graphql_web_socket_link/graphql_web_socket_link.dart';
+import 'package:graphql_web_socket_link/graphql_ws_protocol.dart';
+
+void main() {
+  final delegate = GraphQLWSDelegate();
+  
+  final factory = GraphQLWSProtocolFactory(
+    uri: Uri.parse('ws://localhost:4000/graphql'),
+    delegate: delegate,
+  );
+  
+  final link = GraphQLWebSocketLink(
+    protocolFactory: factory,
+  );
+}
 ```
 
-## Additional information
+### Using with GraphQL Client
 
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
+```dart
+import 'package:gql_link/gql_link.dart';
+
+final link = Link.from([
+  // Other links (like auth)
+  graphQLWebSocketLink,
+]);
+
+// Use with your preferred GraphQL client
+final client = GraphQLClient(
+  link: link,
+  // ... other configuration
+);
+```
+
+### Authentication
+
+```dart
+class AuthenticatedDelegate extends GraphQLWSDelegate {
+  final String token;
+  
+  AuthenticatedDelegate(this.token);
+  
+  @override
+  Map<String, dynamic>? getInitialPayload() {
+    return {
+      'token': token,
+    };
+  }
+}
+
+final link = GraphQLWebSocketLink(
+  protocolFactory: GraphQLWSProtocolFactory(
+    uri: Uri.parse('ws://localhost:4000/graphql'),
+    delegate: AuthenticatedDelegate('your-auth-token'),
+  ),
+);
+```
+
+### Custom ID Generation
+
+```dart
+class IncrementalIdGenerator implements IdGenerator {
+  int _counter = 0;
+  
+  @override
+  String generate() => (++_counter).toString();
+}
+
+final link = GraphQLWebSocketLink(
+  protocolFactory: factory,
+  idGenerator: IncrementalIdGenerator(),
+);
+```
+
+### Using Legacy Protocol
+
+```dart
+import 'package:graphql_web_socket_link/subscriptions_transports_ws_protocol.dart';
+
+final link = GraphQLWebSocketLink(
+  protocolFactory: SubscriptionsTransportsWSProtocolFactory(
+    uri: Uri.parse('ws://localhost:4000/graphql'),
+    delegate: SubscriptionsTransportsWSDelegate(),
+  ),
+);
+```
+
+### Manual Reconnection
+
+```dart
+final link = GraphQLWebSocketLink(
+  protocolFactory: factory,
+);
+
+// Later when needed
+await link.reconnect();
+```
+
+## Error Handling
+
+The link will automatically handle connection errors and retry operations when appropriate. You can catch errors in your GraphQL operations:
+
+```dart
+try {
+  final result = await client.execute(
+    Request(
+      operation: Operation(
+        document: gql('''
+          subscription OnNewMessage {
+            messageAdded {
+              id
+              content
+            }
+          }
+        '''),
+      ),
+    ),
+  );
+  
+  await for (final response in result) {
+    print(response.data);
+  }
+} catch (error) {
+  print('Error: $error');
+}
+```
+
+## Cleanup
+
+Don't forget to dispose of the link when you're done:
+
+```dart
+await link.dispose();
+```
+
+## See Also
+
+- [graphql_web_socket_client](https://pub.dev/packages/graphql_web_socket_client) - The underlying WebSocket client
+- [gql](https://pub.dev/packages/gql) - GraphQL tooling for Dart
+- [gql_link](https://pub.dev/packages/gql_link) - Base interfaces for GraphQL links
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
