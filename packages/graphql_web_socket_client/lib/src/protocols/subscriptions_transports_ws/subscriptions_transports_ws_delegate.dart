@@ -1,7 +1,7 @@
 part of 'subscriptions_transports_ws_protocol.dart';
 
 class SubscriptionsTransportsWSDelegate extends ProtocolDelegate {
-  SubscriptionsTransportsWSDelegate();
+  const SubscriptionsTransportsWSDelegate();
 
   Duration? get keepAliveInterval => null;
 
