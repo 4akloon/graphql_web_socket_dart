@@ -57,8 +57,8 @@ class GraphQLWebSocketClient {
       print('Connected');
 
       _resubscribe();
-    } catch (error) {
-      print('Error connecting: $error');
+    } catch (error, stackTrace) {
+      print('Error connecting: $error\n$stackTrace');
       _onConnectionLost();
     }
   }
