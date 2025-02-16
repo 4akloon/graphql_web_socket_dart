@@ -16,35 +16,33 @@ part 'graphql_ws_delegate.dart';
 
 typedef GetInitialPayload = FutureOr<Map<String, dynamic>?> Function();
 
-class GraphQLWSProtocol
-    extends GraphQLWebSocketProtocol<ServerMessage, ClientMessage> {
+class GraphQLWSProtocol extends GraphQLWebSocketProtocol<ServerMessage,
+    ClientMessage, GraphQLWSDelegate> {
   GraphQLWSProtocol({
     required WebSocketChannel channel,
     required GraphQLWSDelegate delegate,
-  })  : _delegate = delegate,
-        super(
+  }) : super(
           ChannelAdapter(
             channel,
             incomingMessageConverter: const ServerMessageFromJsonConverter(),
             outgoingMessageConverter: const ClientMessageToJsonConverter(),
           ),
+          delegate,
         );
-
-  final GraphQLWSDelegate _delegate;
 
   Timer? _pingTimer;
 
   @override
   Future<void> initializeConnection() async {
     try {
-      final initialPayload = await _delegate.getInitialPayload();
+      final initialPayload = await delegate.getInitialPayload();
 
       channel.sink.add(ConnectionInitMessage(payload: initialPayload));
       await channel.stream
           .whereType<ConnectionAckMessage>()
           .doOnDone(() => print('disconnected'))
           .first
-          .timeout(_delegate.connectionTimeout);
+          .timeout(delegate.connectionTimeout);
 
       _pingServer();
 
@@ -98,13 +96,13 @@ class GraphQLWSProtocol
 
   void _schedulePing() {
     _pingTimer?.cancel();
-    _pingTimer = Timer(_delegate.pingInterval, _pingServer);
+    _pingTimer = Timer(delegate.pingInterval, _pingServer);
   }
 
   Future<void> _pingServer() async {
     final stopwatch = Stopwatch()..start();
 
-    final ping = await _delegate.getPingMessage();
+    final ping = await delegate.getPingMessage();
 
     channel.sink.add(ping);
 
@@ -116,10 +114,10 @@ class GraphQLWSProtocol
 
       final elapsed = stopwatch.elapsed;
 
-      _delegate._emitLatency(elapsed);
+      delegate._emitLatency(elapsed);
       print('Latency: ${elapsed.inMilliseconds}ms');
     } on TimeoutException {
-      _delegate._emitLatency(null);
+      delegate._emitLatency(null);
     } finally {
       stopwatch.stop();
       _schedulePing();
@@ -127,13 +125,13 @@ class GraphQLWSProtocol
   }
 
   Future<void> _onPing(PingMessage message) async {
-    final pong = await _delegate.onPing(message);
+    final pong = await delegate.onPing(message);
     channel.sink.add(pong);
   }
 
   void _onConnectionLost() {
     _pingTimer?.cancel();
-    _delegate._emitLatency(null);
+    delegate._emitLatency(null);
   }
 
   @override

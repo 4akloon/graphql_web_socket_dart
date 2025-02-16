@@ -9,7 +9,7 @@ abstract class ProtocolDelegate {
 
   FutureOr<Map<String, dynamic>?> getInitialPayload() => null;
 
-  FutureOr<void> onDisconnect(int code, String? reason) {}
+  FutureOr<void> onDisconnect(int? code, String? reason) {}
 
   @protected
   FutureOr<void> dispose() {}

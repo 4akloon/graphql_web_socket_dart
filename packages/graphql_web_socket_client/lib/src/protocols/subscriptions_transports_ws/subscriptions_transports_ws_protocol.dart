@@ -10,33 +10,31 @@ part 'subscriptions_transports_ws_delegate.dart';
 
 typedef GetInitialPayload = FutureOr<Map<String, dynamic>?> Function();
 
-class SubscriptionsTransportsWSProtocol
-    extends GraphQLWebSocketProtocol<ServerMessage, ClientMessage> {
+class SubscriptionsTransportsWSProtocol extends GraphQLWebSocketProtocol<
+    ServerMessage, ClientMessage, SubscriptionsTransportsWSDelegate> {
   SubscriptionsTransportsWSProtocol({
     required WebSocketChannel channel,
     required SubscriptionsTransportsWSDelegate delegate,
-  })  : _delegate = delegate,
-        super(
+  }) : super(
           ChannelAdapter(
             channel,
             incomingMessageConverter: const ServerMessageFromJsonConverter(),
             outgoingMessageConverter: const ClientMessageToJsonConverter(),
           ),
+          delegate,
         );
-
-  final SubscriptionsTransportsWSDelegate _delegate;
 
   @override
   Future<void> initializeConnection() async {
     try {
-      final initialPayload = await _delegate.getInitialPayload();
+      final initialPayload = await delegate.getInitialPayload();
 
       channel.sink.add(ConnectionInitMessage(payload: initialPayload));
       await channel.stream
           .whereType<ConnectionAckMessage>()
           .doOnDone(() => print('disconnected'))
           .first
-          .timeout(_delegate.connectionTimeout);
+          .timeout(delegate.connectionTimeout);
 
       print('connected');
 
@@ -52,7 +50,7 @@ class SubscriptionsTransportsWSProtocol
   }
 
   void _listenForKeepAlive() {
-    final timeLimit = _delegate.keepAliveInterval;
+    final timeLimit = delegate.keepAliveInterval;
     if (timeLimit == null) return;
 
     channel.stream
@@ -62,7 +60,7 @@ class SubscriptionsTransportsWSProtocol
       (_) => print('keep alive'),
       onError: (error, stackTrace) {
         if (error is TimeoutException) {
-          final result = _delegate.onKeepAliveTimeout();
+          final result = delegate.onKeepAliveTimeout();
 
           if (result != null) {
             final (closeCode, closeReason) = result;
