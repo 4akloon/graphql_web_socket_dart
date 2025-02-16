@@ -85,6 +85,10 @@ class GraphQLWebSocketClient {
   Future<void> _onConnectionLost() async {
     print('Connection lost');
     _stateController.add(WSClientState.disconnected);
+    _protocol?.delegate.onDisconnect(
+      _protocol?.channel.closeCode,
+      _protocol?.channel.closeReason,
+    );
 
     if (_autoReconnectInterval != null) {
       await _reconnect();
