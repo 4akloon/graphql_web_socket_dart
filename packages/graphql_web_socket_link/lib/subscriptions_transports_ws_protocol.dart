@@ -1,0 +1,1 @@
+export 'package:graphql_web_socket_client/subscriptions_transports_ws_protocol.dart';
