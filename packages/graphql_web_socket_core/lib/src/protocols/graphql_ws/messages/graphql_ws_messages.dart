@@ -12,19 +12,6 @@ part 'next_message.dart';
 part 'error_message.dart';
 part 'complete_message.dart';
 
-mixin ChunkedConversionSinkConverter<S, T> on Converter<S, T> {
-  @override
-  Sink<S> startChunkedConversion(Sink<T> sink) =>
-      ChunkedConversionSink.withCallback(
-        (accumulated) {
-          for (final value in accumulated) {
-            sink.add(convert(value));
-          }
-          sink.close();
-        },
-      );
-}
-
 class ServerMessageCodec extends Codec<ServerMessage, Map<String, dynamic>> {
   const ServerMessageCodec();
 
@@ -38,8 +25,7 @@ class ServerMessageCodec extends Codec<ServerMessage, Map<String, dynamic>> {
 }
 
 class ServerMessageFromJsonConverter
-    extends Converter<Map<String, dynamic>, ServerMessage>
-    with ChunkedConversionSinkConverter {
+    extends Converter<Map<String, dynamic>, ServerMessage> {
   const ServerMessageFromJsonConverter();
 
   @override
@@ -48,8 +34,7 @@ class ServerMessageFromJsonConverter
 }
 
 class ServerMessageToJsonConverter
-    extends Converter<ServerMessage, Map<String, dynamic>>
-    with ChunkedConversionSinkConverter {
+    extends Converter<ServerMessage, Map<String, dynamic>> {
   const ServerMessageToJsonConverter();
 
   @override
@@ -69,8 +54,7 @@ class ClientMessageCodec extends Codec<ClientMessage, Map<String, dynamic>> {
 }
 
 class ClientMessageFromJsonConverter
-    extends Converter<Map<String, dynamic>, ClientMessage>
-    with ChunkedConversionSinkConverter {
+    extends Converter<Map<String, dynamic>, ClientMessage> {
   const ClientMessageFromJsonConverter();
 
   @override
@@ -79,8 +63,7 @@ class ClientMessageFromJsonConverter
 }
 
 class ClientMessageToJsonConverter
-    extends Converter<ClientMessage, Map<String, dynamic>>
-    with ChunkedConversionSinkConverter {
+    extends Converter<ClientMessage, Map<String, dynamic>> {
   const ClientMessageToJsonConverter();
 
   @override
