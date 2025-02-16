@@ -11,8 +11,7 @@ class ChannelAdapter<I, O> {
     required Converter<O, Map<String, dynamic>> outgoingMessageConverter,
   })  : sink = ChannelAdapterSink(_channel.sink, outgoingMessageConverter),
         stream = _channel.stream
-            .cast<String>()
-            .transform(json.decoder)
+            .map((data) => json.decode(data))
             .transform(incomingMessageConverter)
             .asBroadcastStream();
 
