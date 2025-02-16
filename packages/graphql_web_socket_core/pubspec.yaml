@@ -1,6 +1,7 @@
 name: graphql_web_socket_core
 description: A WebSocket transport for GraphQL.
 version: 0.0.1
+publish_to: none
 
 environment:
   sdk: ^3.6.0
