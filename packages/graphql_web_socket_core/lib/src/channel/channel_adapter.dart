@@ -12,7 +12,8 @@ class ChannelAdapter<I, O> {
   })  : sink = ChannelAdapterSink(_channel.sink, outgoingMessageConverter),
         stream = _channel.stream
             .cast<String>()
-            .transform(json.decoder.fuse(incomingMessageConverter))
+            .transform(json.decoder)
+            .transform(incomingMessageConverter)
             .asBroadcastStream();
 
   final WebSocketChannel _channel;
