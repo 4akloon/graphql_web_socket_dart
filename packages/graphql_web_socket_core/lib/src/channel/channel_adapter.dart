@@ -11,8 +11,8 @@ class ChannelAdapter<I, O> {
     required Converter<O, Map<String, dynamic>> outgoingMessageConverter,
   })  : sink = ChannelAdapterSink(_channel.sink, outgoingMessageConverter),
         stream = _channel.stream
-            .map((data) => json.decode(data))
-            .transform(incomingMessageConverter)
+            .map((data) => json.decoder.convert(data))
+            .map((data) => incomingMessageConverter.convert(data))
             .asBroadcastStream();
 
   final WebSocketChannel _channel;
@@ -51,7 +51,7 @@ class ChannelAdapterSink<C> implements StreamSink<C> {
 
   @override
   Future<void> addStream(Stream<C> stream) => _sink.addStream(
-        stream.transform(_outgoingMessageConverter).map(json.encode),
+        stream.map((data) => _outgoingMessageConverter.convert(data)),
       );
 
   @override
