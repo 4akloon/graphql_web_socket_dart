@@ -35,14 +35,14 @@ class ChannelAdapterSink<C> implements StreamSink<C> {
   ChannelAdapterSink(
     this._sink,
     Converter<C, Map<String, dynamic>> outgoingMessageConverter,
-  ) : _outgoingMessageConverter =
-            outgoingMessageConverter.fuse(json.encoder.cast());
+  ) : _outgoingMessageConverter = outgoingMessageConverter;
 
   final StreamSink _sink;
-  final Converter<C, String> _outgoingMessageConverter;
+  final Converter<C, Map<String, dynamic>> _outgoingMessageConverter;
 
   @override
-  void add(C data) => _sink.add(_outgoingMessageConverter.convert(data));
+  void add(C data) =>
+      _sink.add(json.encode(_outgoingMessageConverter.convert(data)));
 
   @override
   void addError(Object error, [StackTrace? stackTrace]) => _sink.addError(
@@ -52,7 +52,7 @@ class ChannelAdapterSink<C> implements StreamSink<C> {
 
   @override
   Future<void> addStream(Stream<C> stream) => _sink.addStream(
-        stream.transform(_outgoingMessageConverter),
+        stream.transform(_outgoingMessageConverter).map(json.encode),
       );
 
   @override
