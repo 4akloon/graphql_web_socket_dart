@@ -39,6 +39,10 @@ class GraphQLWebSocketClient<P extends GraphQLWebSocketProtocol> {
   );
   Timer? _reconnectTimer;
 
+  WSClientState get state => _stateController.value;
+
+  Stream<WSClientState> get stateStream => _stateController.stream;
+
   Future<void> connect() async {
     if (_stateController.value != WSClientState.disconnected) return;
     print('Connecting');
