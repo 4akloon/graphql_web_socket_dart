@@ -16,20 +16,20 @@ enum WSClientState {
   disconnected,
 }
 
-class GraphQLWebSocketClient {
+class GraphQLWebSocketClient<P extends GraphQLWebSocketProtocol> {
   GraphQLWebSocketClient({
-    required GraphQLWebSocketProtocolFactory protocolFactory,
+    required GraphQLWebSocketProtocolFactory<P> protocolFactory,
     IdGenerator? idGenerator,
     Duration? autoReconnectInterval = const Duration(seconds: 1),
   })  : _protocolFactory = protocolFactory,
         _idGenerator = idGenerator ?? UuidIdGenerator(),
         _autoReconnectInterval = autoReconnectInterval;
 
-  final GraphQLWebSocketProtocolFactory _protocolFactory;
+  final GraphQLWebSocketProtocolFactory<P> _protocolFactory;
   final IdGenerator _idGenerator;
   final Duration? _autoReconnectInterval;
 
-  GraphQLWebSocketProtocol? _protocol;
+  P? _protocol;
   final _streamController =
       StreamController<ClientOperationMessage>.broadcast();
   final _subscriptions = <String, SubscriptionEntity>{};
